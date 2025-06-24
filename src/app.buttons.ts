@@ -1,6 +1,6 @@
 import { Markup } from 'telegraf';
 
-export function getActionButtons() {
+export function getActionButtons(): Markup.Markup<any> {
   return Markup.keyboard(
     [
       Markup.button.callback('📋 Пройти тест', 'quiz'),
