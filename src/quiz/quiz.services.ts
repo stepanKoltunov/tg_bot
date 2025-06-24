@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Context, Markup } from 'telegraf';
 import { QUIZ_QUESTIONS } from './quiz.data';
 import { getActionButtons } from '../app.buttons';
+import { generateImtText, isAnswerCorrect, isValidNumber } from '../utils';
 
 @Injectable()
 export class QuizService {
@@ -30,13 +31,13 @@ export class QuizService {
   async sendQuestion(ctx: Context, step: number) {
     const questionIndex = step - 1;
 
-    if (step <= 7) {
+    if (QUIZ_QUESTIONS[questionIndex].type === 'choice') {
       // Вопросы с вариантами ответов
       await ctx.reply(
         this.questions[questionIndex],
         Markup.keyboard(this.options[questionIndex] as string[]).resize().oneTime()
       );
-    } else {
+    } else if(QUIZ_QUESTIONS[questionIndex].type === 'text') {
       // Последний вопрос - текстовый
       await ctx.reply(
         this.questions[questionIndex],
@@ -51,18 +52,22 @@ export class QuizService {
     if (!quiz) return false;
 
     const currentStep = quiz.step;
-    const stepIndex = currentStep - 1;
+    const questionIndex = currentStep - 1;
 
-    // Для последнего вопроса проверяем длину ответа
-    if (currentStep === 8 || currentStep === 9) {
+    // Для последних вопроса проверяем длину ответа
+    if (QUIZ_QUESTIONS[questionIndex].type === 'text') {
       if (answer.length < 1) {
         await ctx.reply("❌ Это поле обязательное и не может быть пустым.");
+        return false;
+      }
+      if (!isValidNumber(answer)) {
+        await ctx.reply("❌ Вводите числа формата: 1.3 или 13");
         return false;
       }
     }
 
     // Сохраняем ответ
-    quiz.answers[stepIndex] = answer;
+    quiz.answers[questionIndex] = answer.trim();
     quiz.step++;
 
     return true;
@@ -76,20 +81,27 @@ export class QuizService {
     // Формируем отчет
     let report = "📊 Ваши ответы:\n\n";
     quiz.answers.forEach((answer, index) => {
-      report += `${index + 1}. ${answer || 'Нет ответа'}\n`;
+      if (index >= 5) {
+        report += `${index + 1}. ${answer || 'Нет ответа'}\n`;
+        return;
+      }
+      if (isAnswerCorrect(answer, index)) {
+        report += `${index + 1}. ✅ ${answer || 'Нет ответа'}\n`;
+      } else {
+        report += `${index + 1}. ❌ ${answer || 'Нет ответа'}\n`;
+      }
     });
 
     await ctx.reply(report);
 
-    // Здесь можно добавить логику оценки ответов
     let correctAnswers = 0
     quiz.answers.forEach((answer, index) => {
-      if (QUIZ_QUESTIONS[index].currentAnswer?.includes(answer)) {
+      if (isAnswerCorrect(answer, index)) {
         correctAnswers++
       }
     });
     await ctx.reply(`✅ Правильных ответов: ${correctAnswers}/5`);
-
+    generateImtText(quiz.answers, correctAnswers)
     // Сбрасываем состояние
     delete ctx.session.quiz;
   }
