@@ -7,24 +7,30 @@ import { generateImtText, isAnswerCorrect, isValidNumber } from '../utils';
 @Injectable()
 export class QuizService {
   // Вопросы квиза
-  private readonly questions = QUIZ_QUESTIONS.map(data=> data.text)
+  private readonly questions = QUIZ_QUESTIONS.map((data) => data.text);
 
   // Варианты ответов для вопросов 1-5
-  private readonly options = QUIZ_QUESTIONS.map(data=> data.options)
+  private readonly options = QUIZ_QUESTIONS.map((data) => data.options);
 
   // Запуск квиза
   async startQuiz(ctx: Context) {
     ctx.session.quiz = {
       step: 1,
-      answers: new Array(6).fill(null)
+      answers: new Array(6).fill(null),
     };
     await this.sendQuestion(ctx, 1);
-    setTimeout(() => {
-      if (ctx.session.quiz?.step) {
-        delete ctx.session.quiz;
-        ctx.reply('⌛ Время на прохождение квиза истекло', getActionButtons());
-      }
-    }, 10 * 60 * 1000); // 10 минут
+    setTimeout(
+      () => {
+        if (ctx.session.quiz?.step) {
+          delete ctx.session.quiz;
+          ctx.reply(
+            '⌛ Время на прохождение квиза истекло',
+            getActionButtons(),
+          );
+        }
+      },
+      10 * 60 * 1000,
+    ); // 10 минут
   }
 
   // Отправка вопроса пользователю
@@ -35,14 +41,13 @@ export class QuizService {
       // Вопросы с вариантами ответов
       await ctx.reply(
         this.questions[questionIndex],
-        Markup.keyboard(this.options[questionIndex] as string[]).resize().oneTime()
+        Markup.keyboard(this.options[questionIndex] as string[])
+          .resize()
+          .oneTime(),
       );
-    } else if(QUIZ_QUESTIONS[questionIndex].type === 'text') {
+    } else if (QUIZ_QUESTIONS[questionIndex].type === 'text') {
       // Последний вопрос - текстовый
-      await ctx.reply(
-        this.questions[questionIndex],
-        Markup.removeKeyboard()
-      );
+      await ctx.reply(this.questions[questionIndex], Markup.removeKeyboard());
     }
   }
 
@@ -57,11 +62,11 @@ export class QuizService {
     // Для последних вопроса проверяем длину ответа
     if (QUIZ_QUESTIONS[questionIndex].type === 'text') {
       if (answer.length < 1) {
-        await ctx.reply("❌ Это поле обязательное и не может быть пустым.");
+        await ctx.reply('❌ Это поле обязательное и не может быть пустым.');
         return false;
       }
       if (!isValidNumber(answer)) {
-        await ctx.reply("❌ Вводите числа формата: 1.3 или 13");
+        await ctx.reply('❌ Вводите числа формата: 1.3 или 13');
         return false;
       }
     }
@@ -79,7 +84,7 @@ export class QuizService {
     if (!quiz) return;
 
     // Формируем отчет
-    let report = "📊 Ваши ответы:\n\n";
+    let report = '📊 Ваши ответы:\n\n';
     quiz.answers.forEach((answer, index) => {
       if (index >= 5) {
         report += `${index + 1}. ${answer || 'Нет ответа'}\n`;
@@ -94,14 +99,14 @@ export class QuizService {
 
     await ctx.reply(report);
 
-    let correctAnswers = 0
+    let correctAnswers = 0;
     quiz.answers.forEach((answer, index) => {
       if (isAnswerCorrect(answer, index)) {
-        correctAnswers++
+        correctAnswers++;
       }
     });
     await ctx.reply(`✅ Правильных ответов: ${correctAnswers}/5`);
-    generateImtText(quiz.answers, correctAnswers)
+    generateImtText(quiz.answers, correctAnswers);
     // Сбрасываем состояние
     delete ctx.session.quiz;
   }

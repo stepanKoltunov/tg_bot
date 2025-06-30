@@ -1,4 +1,12 @@
-import { Ctx, Hears, Help, InjectBot, On, Start, Update } from 'nestjs-telegraf';
+import {
+  Ctx,
+  Hears,
+  Help,
+  InjectBot,
+  On,
+  Start,
+  Update,
+} from 'nestjs-telegraf';
 import { Context, Markup, Telegraf } from 'telegraf';
 import { getActionButtons } from './app.buttons';
 import { QuizService } from './quiz/quiz.services';
@@ -7,36 +15,35 @@ import { QuizService } from './quiz/quiz.services';
 export class AppUpdate {
   constructor(
     @InjectBot() private readonly bot: Telegraf<Context>,
-    private readonly quizService: QuizService
+    private readonly quizService: QuizService,
   ) {}
 
   @Start()
   async startBotCommand(ctx: Context) {
-    await ctx.reply('Привет! Что ты хочешь сделать?', getActionButtons())
+    await ctx.reply('Привет! Что ты хочешь сделать?', getActionButtons());
   }
 
   @Help()
   async getHelp(ctx: Context) {
-    await ctx.reply('Попробуйте: /start', getActionButtons())
+    await ctx.reply('Попробуйте: /start', getActionButtons());
   }
 
   @Hears('💡 Информация')
   async getInfo(ctx: Context) {
-    await ctx.reply('Доп Информация + ссылка на тг группу')
+    await ctx.reply('Доп Информация + ссылка на тг группу');
   }
 
   @Hears('☎ Оставить номер для обратной связи')
   async sendPhone(ctx: Context) {
-    await ctx.reply('номер отправлен Юлии')
+    await ctx.reply('номер отправлен Юлии');
   }
 
-
-//------КВИЗ
+  //------КВИЗ
 
   @Hears('📋 Пройти тест')
   async startQuiz(ctx: Context) {
-    await ctx.reply('Квиз запущен', Markup.removeKeyboard())
-    await this.quizService.startQuiz(ctx)
+    await ctx.reply('Квиз запущен', Markup.removeKeyboard());
+    await this.quizService.startQuiz(ctx);
   }
 
   // Команда для отмены квиза

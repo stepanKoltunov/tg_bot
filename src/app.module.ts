@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { AppUpdate } from './app.update';
 import { TelegrafModule } from 'nestjs-telegraf';
-import * as LocalSession from 'telegraf-session-local'
-import * as process from "node:process";
+import * as LocalSession from 'telegraf-session-local';
+import * as process from 'node:process';
 import { ConfigModule } from '@nestjs/config';
 import { QuizService } from './quiz/quiz.services';
 import { Context } from 'telegraf';
@@ -16,7 +16,7 @@ const sessions = new LocalSession({
     }
     return '';
   },
-})
+});
 
 @Module({
   imports: [
