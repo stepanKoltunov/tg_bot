@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { Context, Markup } from 'telegraf';
 import { QUIZ_QUESTIONS } from './quiz.data';
-import { getActionButtons } from '../app.buttons';
-import { generateImtText, isAnswerCorrect, isValidNumber } from '../utils';
+import { getActionButtons } from '../../app.buttons';
+import { generateImtText, isValidNumber } from '../../utils';
 
 @Injectable()
 export class QuizService {
@@ -14,6 +14,7 @@ export class QuizService {
 
   // Запуск квиза
   async startQuiz(ctx: Context) {
+    await ctx.reply('Тест запущен', Markup.removeKeyboard());
     ctx.session.quiz = {
       step: 1,
       answers: new Array(6).fill(null),
@@ -42,8 +43,7 @@ export class QuizService {
       await ctx.reply(
         this.questions[questionIndex],
         Markup.keyboard(this.options[questionIndex] as string[])
-          .resize()
-          .oneTime(),
+          .resize(),
       );
     } else if (QUIZ_QUESTIONS[questionIndex].type === 'text') {
       // Последний вопрос - текстовый
@@ -86,27 +86,12 @@ export class QuizService {
     // Формируем отчет
     let report = '📊 Ваши ответы:\n\n';
     quiz.answers.forEach((answer, index) => {
-      if (index >= 5) {
         report += `${index + 1}. ${answer || 'Нет ответа'}\n`;
-        return;
-      }
-      if (isAnswerCorrect(answer, index)) {
-        report += `${index + 1}. ✅ ${answer || 'Нет ответа'}\n`;
-      } else {
-        report += `${index + 1}. ❌ ${answer || 'Нет ответа'}\n`;
-      }
     });
-
     await ctx.reply(report);
+    await ctx.reply(`Ваш результат записан ✅`, getActionButtons());
+    await ctx.reply(generateImtText(quiz.answers));
 
-    let correctAnswers = 0;
-    quiz.answers.forEach((answer, index) => {
-      if (isAnswerCorrect(answer, index)) {
-        correctAnswers++;
-      }
-    });
-    await ctx.reply(`✅ Правильных ответов: ${correctAnswers}/5`);
-    generateImtText(quiz.answers, correctAnswers);
     // Сбрасываем состояние
     delete ctx.session.quiz;
   }

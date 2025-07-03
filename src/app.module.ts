@@ -4,8 +4,9 @@ import { TelegrafModule } from 'nestjs-telegraf';
 import * as LocalSession from 'telegraf-session-local';
 import * as process from 'node:process';
 import { ConfigModule } from '@nestjs/config';
-import { QuizService } from './quiz/quiz.services';
+import { QuizService } from './services/quiz/quiz.services';
 import { Context } from 'telegraf';
+import { AppService } from './services/app/app.service';
 
 const sessions = new LocalSession({
   database: 'session_db.json',
@@ -21,13 +22,13 @@ const sessions = new LocalSession({
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: `.env`,
+      envFilePath: '.env',
     }),
     TelegrafModule.forRoot({
       middlewares: [sessions.middleware()],
       token: process.env.TELEGRAM_BOT_TOKEN as string,
     }),
   ],
-  providers: [AppUpdate, QuizService],
+  providers: [AppUpdate, QuizService, AppService],
 })
 export class AppModule {}

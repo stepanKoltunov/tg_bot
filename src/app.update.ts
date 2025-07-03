@@ -7,15 +7,17 @@ import {
   Start,
   Update,
 } from 'nestjs-telegraf';
-import { Context, Markup, Telegraf } from 'telegraf';
+import { Context, Telegraf } from 'telegraf';
 import { getActionButtons } from './app.buttons';
-import { QuizService } from './quiz/quiz.services';
+import { QuizService } from './services/quiz/quiz.services';
+import { AppService } from './services/app/app.service';
 
 @Update()
 export class AppUpdate {
   constructor(
     @InjectBot() private readonly bot: Telegraf<Context>,
     private readonly quizService: QuizService,
+    private readonly appService: AppService,
   ) {}
 
   @Start()
@@ -30,19 +32,20 @@ export class AppUpdate {
 
   @Hears('💡 Информация')
   async getInfo(ctx: Context) {
-    await ctx.reply('Доп Информация + ссылка на тг группу');
+    await this.appService.getMessageInfo(ctx);
+    await this.appService.getMessageJoinGroup(ctx)
   }
 
   @Hears('☎ Оставить номер для обратной связи')
   async sendPhone(ctx: Context) {
     await ctx.reply('номер отправлен Юлии');
+    await this.appService.getMessageJoinGroup(ctx)
   }
 
   //------КВИЗ
 
   @Hears('📋 Пройти тест')
   async startQuiz(ctx: Context) {
-    await ctx.reply('Квиз запущен', Markup.removeKeyboard());
     await this.quizService.startQuiz(ctx);
   }
 
@@ -51,8 +54,7 @@ export class AppUpdate {
   async cancelQuiz(@Ctx() ctx: Context) {
     if (ctx.session.quiz) {
       delete ctx.session.quiz;
-      await ctx.reply('❌ Квиз отменен');
-      await ctx.reply('Что вы хотите сделать?', getActionButtons());
+      await ctx.reply('❌ Тест отменен');
     }
   }
 
@@ -78,7 +80,7 @@ export class AppUpdate {
     } else {
       // Завершаем квиз
       await this.quizService.finishQuiz(ctx);
-      await ctx.reply('Что вы хотите сделать дальше?', getActionButtons());
+      await this.appService.getMessageJoinGroup(ctx)
     }
   }
 }
