@@ -5,7 +5,7 @@ export function getActionButtons(): Markup.Markup<any> {
     [
       Markup.button.callback('📋 Пройти тест', 'quiz'),
       Markup.button.callback('💡 Информация', 'info'),
-      Markup.button.callback('☎ Оставить номер для обратной связи', 'phone'),
+      Markup.button.callback('☎ Отправить данные для обратной связи', 'phone'),
     ],
     { columns: 2 },
   ).resize();

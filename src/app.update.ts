@@ -36,9 +36,9 @@ export class AppUpdate {
     await this.appService.getMessageJoinGroup(ctx)
   }
 
-  @Hears('☎ Оставить номер для обратной связи')
+  @Hears('☎ Отправить данные для обратной связи')
   async sendPhone(ctx: Context) {
-    await ctx.reply('номер отправлен Юлии');
+    await this.appService.sendPhoneToAdmin(ctx)
     await this.appService.getMessageJoinGroup(ctx)
   }
 
@@ -54,7 +54,7 @@ export class AppUpdate {
   async cancelQuiz(@Ctx() ctx: Context) {
     if (ctx.session.quiz) {
       delete ctx.session.quiz;
-      await ctx.reply('❌ Тест отменен');
+      await ctx.reply('❌ Тест отменен', getActionButtons());
     }
   }
 

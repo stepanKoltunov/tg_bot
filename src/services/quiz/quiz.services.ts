@@ -2,7 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { Context, Markup } from 'telegraf';
 import { QUIZ_QUESTIONS } from './quiz.data';
 import { getActionButtons } from '../../app.buttons';
-import { generateImtText, isValidNumber } from '../../utils';
+import { generateImtText, isValidNumber } from './utils';
+import * as process from 'node:process';
+import { getTextForAdmin } from '../../utils';
 
 @Injectable()
 export class QuizService {
@@ -25,7 +27,7 @@ export class QuizService {
         if (ctx.session.quiz?.step) {
           delete ctx.session.quiz;
           ctx.reply(
-            '⌛ Время на прохождение квиза истекло',
+            '⌛ Время на прохождение теста истекло',
             getActionButtons(),
           );
         }
@@ -89,10 +91,23 @@ export class QuizService {
         report += `${index + 1}. ${answer || 'Нет ответа'}\n`;
     });
     await ctx.reply(report);
-    await ctx.reply(`Ваш результат записан ✅`, getActionButtons());
-    await ctx.reply(generateImtText(quiz.answers));
+    await ctx.reply(`Ваш результат отправлен эксперту ✅`, getActionButtons());
+    const imtText = generateImtText(quiz.answers)
+    await ctx.reply(imtText);
+
+    //отправляем результат
+    await this.sendResultToAdmin(ctx, report)
 
     // Сбрасываем состояние
     delete ctx.session.quiz;
+  }
+
+  async sendResultToAdmin(ctx: Context, message: string) {
+    try {
+      const adminId = process.env.ADMIN_TELEGRAM_ID as string;
+      await ctx.telegram.sendMessage(adminId, getTextForAdmin(ctx, message));
+    } catch (error) {
+      await ctx.reply("⚠️ Произошла техническая ошибка при отправки сообщения");
+    }
   }
 }

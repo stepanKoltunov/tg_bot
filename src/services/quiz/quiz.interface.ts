@@ -4,4 +4,6 @@ export interface QuizQuestion {
   type: 'choice' | 'text'; // Тип вопроса
   currentAnswer?: string[];
   options?: string[]; // Только для типа 'choice'
+  responseIfGoodImt?: string;
+  responseIfBadImt?: string;
 }
