@@ -22,7 +22,7 @@ export class AppUpdate {
 
   @Start()
   async startBotCommand(ctx: Context) {
-    await ctx.reply('Привет! Что ты хочешь сделать?', getActionButtons());
+    await ctx.reply('Привет! Тест за 2 минуты, поможет узнать важное о себе и начать шаги к изменениям.', getActionButtons());
   }
 
   @Help()

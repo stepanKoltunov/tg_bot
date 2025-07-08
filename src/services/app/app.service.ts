@@ -7,7 +7,7 @@ import * as process from 'node:process';
 export class AppService {
 
   async getMessageJoinGroup(ctx: Context) {
-    await ctx.reply(`Вы можете следить за новыми новостями в нашем телеграм канале: ${process.env.CHAT_ID}`)
+    await ctx.reply(`Вы можете следить за новостями в нашем телеграм канале: ${process.env.CHAT_ID}`)
   }
 
   async getMessageInfo(ctx: Context) {
