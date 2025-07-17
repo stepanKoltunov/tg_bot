@@ -4,6 +4,11 @@ export interface QuizQuestion {
   type: 'choice' | 'text'; // Тип вопроса
   currentAnswer?: string[];
   options?: string[]; // Только для типа 'choice'
-  responseIfGoodImt?: string;
-  responseIfBadImt?: string;
+  responseIfGood?: string;
+  responseIfBad?: string;
+}
+
+export enum QuizIdsEnum {
+  QUIZ_QUESTIONS_IMT,
+  QUIZ_QUESTIONS_STRESS,
 }
