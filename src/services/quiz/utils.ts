@@ -72,7 +72,6 @@ export const generateStressText = (answers: string[]): string => {
   const goodSleepTime = sleepTime >= 7;
   const numOfGoodAnswers = answers.reduce((acc, curr, index) => {
     if (isAnswerCorrect(curr, index, QuizIdsEnum.QUIZ_QUESTIONS_STRESS)) {
-      console.log(acc, curr);
       return acc + 1
     }
     return acc;
